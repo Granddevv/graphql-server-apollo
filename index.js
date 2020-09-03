@@ -8,14 +8,17 @@ const cors = require("cors");
 const schema = gql`
   type Query {
     listUser: User
+    getUser(id: ID!): User
     listGroup: Group
   }
 
   type User {
+    id: ID!
     username: String!
   }
 
   type Group {
+    id: ID!
     groupName: String!
   }
 `;
@@ -30,6 +33,11 @@ const resolvers = {
     listGroup: () => {
       return {
         groupName: "Test Group",
+      };
+    },
+    getUser: () => {
+      return {
+        username: "BBB",
       };
     },
   },
