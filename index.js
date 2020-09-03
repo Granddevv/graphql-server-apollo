@@ -9,7 +9,8 @@ const schema = gql`
   type Query {
     listUser: [User]
     getUser(id: ID!): User
-    listGroup: Group
+    listGroup: [Group]
+    getDefaultUser: User
   }
 
   type User {
@@ -20,6 +21,7 @@ const schema = gql`
   type Group {
     id: ID!
     groupName: String!
+    user: User!
   }
 `;
 
@@ -42,6 +44,24 @@ let users = {
   },
 };
 
+let groups = {
+  1: {
+    id: "1",
+    groupName: "Group 1",
+    userId: "2",
+  },
+  2: {
+    id: "2",
+    groupName: "Group 1",
+    userId: "3",
+  },
+  3: {
+    id: "3",
+    groupName: "Group 1",
+    userId: "4",
+  },
+};
+
 const resolvers = {
   Query: {
     listUser: () => {
@@ -49,13 +69,27 @@ const resolvers = {
     },
 
     listGroup: () => {
-      return {
-        groupName: "Test Group",
-      };
+      return Object.values(groups);
     },
 
     getUser: (parent, { id }) => {
       return users[id];
+    },
+
+    getDefaultUser: (parent, args, { defaultUser }, info) => {
+      return defaultUser;
+    },
+  },
+
+  User: {
+    username: (user) => {
+      return user.username;
+    },
+  },
+
+  Group: {
+    user: (parent, args, { defaultUser }) => {
+      return users[parent.userId];
     },
   },
 };
@@ -63,6 +97,9 @@ const resolvers = {
 const server = new ApolloServer({
   typeDefs: schema,
   resolvers,
+  context: {
+    defaultUser: users[1],
+  },
 });
 
 server.applyMiddleware({ app, path: "/graphql" });
